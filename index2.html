@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Text Prompt</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="displayText">Hello, World!</h1>
+    <button onclick="editText()">Edit Text</button>
+    
+    <script>
+        // Load saved text from localStorage
+        document.addEventListener("DOMContentLoaded", function() {
+            let savedText = localStorage.getItem("savedText");
+            if (savedText) {
+                document.getElementById("displayText").textContent = savedText;
+            }
+        });
+        
+        function editText() {
+            let textElement = document.getElementById("displayText");
+            let newText = prompt("Edit the text:", textElement.textContent);
+            if (newText !== null) {
+                textElement.textContent = newText;
+                localStorage.setItem("savedText", newText); // Save text in localStorage
+            }
+        }
+    </script>
+</body>
+</html>
