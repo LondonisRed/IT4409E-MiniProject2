@@ -85,7 +85,223 @@ window.onload = function () {
   showContent('courseInfo');
 };
 
-// Modify the click handlers for eye icons
+// Function to update section name in navbar and local storage
+function updateSectionName(oldName, newName) {
+  // Get current data from local storage
+  const sectionNames = JSON.parse(localStorage.getItem('sectionNames') || '{}');
+  const menuItems = JSON.parse(localStorage.getItem('menuItems') || '{}');
+  
+  // Update storage
+  menuItems[newName] = menuItems[oldName] || [];
+  delete menuItems[oldName];
+  sectionNames[newName] = newName;
+  delete sectionNames[oldName];
+  
+  // Save to local storage
+  localStorage.setItem('sectionNames', JSON.stringify(sectionNames));
+  localStorage.setItem('menuItems', JSON.stringify(menuItems));
+  
+  // Update in navbar
+  const navbar = document.querySelector('.w3-top .w3-bar');
+  const navbarLinks = Array.from(navbar.querySelectorAll('.w3-bar-item'));
+  const linkToUpdate = navbarLinks.find(link => link.textContent.trim() === oldName);
+  
+  if (linkToUpdate) {
+    linkToUpdate.textContent = newName;
+    linkToUpdate.addEventListener('click', function(event) {
+      showContent(newName.toLowerCase().replace(/\s+/g, '-'), event);
+    });
+  }
+  
+  // Update section container
+  const oldContainer = document.getElementById(oldName.toLowerCase().replace(/\s+/g, '-'));
+  if (oldContainer) {
+    oldContainer.id = newName.toLowerCase().replace(/\s+/g, '-');
+    const header = oldContainer.querySelector('.header');
+    if (header) {
+      header.textContent = newName;
+    }
+  }
+}
+
+// Function to get default menu items for a section
+function getDefaultMenuItems(sectionName) {
+  switch(sectionName) {
+    case 'Trang chủ':
+      return ['Thông tin khai giảng', 'Thông tin semina', 'Công ty quan tâm'];
+    case 'Thông tin môn học':
+      return ['Thông tin chung', 'Mô tả tóm tắt', 'Nội dung chi tiết', 'Tài liệu tham khảo'];
+    case 'Các công nghệ web':
+      return ['Frontend', 'Backend', 'Database', 'API', 'DevOps', 'Security', 'Testing'];
+    case 'Thông tin sinh viên':
+      return ['Thông tin cá nhân', 'Học tập', 'Kỹ năng', 'Dự án', 'Sở thích'];
+    default:
+      return [];
+  }
+}
+
+function getMenuItems(sectionName) {
+  // First try to get from local storage
+  const menuItems = JSON.parse(localStorage.getItem('menuItems') || '{}');
+  if (menuItems[sectionName]) {
+    return menuItems[sectionName];
+  }
+  
+  // If not in local storage, get default items and store them
+  const defaultItems = getDefaultMenuItems(sectionName);
+  menuItems[sectionName] = defaultItems;
+  localStorage.setItem('menuItems', JSON.stringify(menuItems));
+  return defaultItems;
+}
+
+// Function to load section names from local storage
+function loadSectionNames() {
+  const sectionNames = JSON.parse(localStorage.getItem('sectionNames') || '{}');
+  const navbarLinks = document.querySelectorAll('.w3-top .w3-bar-item');
+  
+  navbarLinks.forEach(link => {
+    const originalName = link.textContent.trim();
+    if (sectionNames[originalName]) {
+      link.textContent = sectionNames[originalName];
+    }
+  });
+}
+
+// Function to delete a section and its menu items
+function deleteSection(sectionName) {
+  // Get current data from local storage
+  const sectionNames = JSON.parse(localStorage.getItem('sectionNames') || '{}');
+  const menuItems = JSON.parse(localStorage.getItem('menuItems') || '{}');
+  
+  // Remove section and its menu items
+  delete sectionNames[sectionName];
+  delete menuItems[sectionName];
+  
+  // Save updated data to local storage
+  localStorage.setItem('sectionNames', JSON.stringify(sectionNames));
+  localStorage.setItem('menuItems', JSON.stringify(menuItems));
+  
+  // Remove from navbar
+  const navbar = document.querySelector('.w3-top .w3-bar');
+  const navbarLinks = Array.from(navbar.querySelectorAll('.w3-bar-item'));
+  const linkToRemove = navbarLinks.find(link => link.textContent.trim() === sectionName);
+  
+  if (linkToRemove) {
+    navbar.removeChild(linkToRemove);
+  }
+  
+  // Remove the section's content container
+  const sectionContainer = document.getElementById(sectionName.toLowerCase().replace(/\s+/g, '-'));
+  if (sectionContainer) {
+    sectionContainer.remove();
+  }
+  
+  // If this was the active section, show the home page
+  const activeButton = document.querySelector('.w3-bar-item.active');
+  if (activeButton && activeButton.textContent.trim() === sectionName) {
+    showContent('courseInfo');
+  }
+}
+
+// Function to add menu item to a section
+function addMenuItem(sectionName, newItem) {
+  // Get current menu items from local storage
+  const menuItems = JSON.parse(localStorage.getItem('menuItems') || '{}');
+  
+  // Initialize menu items for section if not exists
+  if (!menuItems[sectionName]) {
+    menuItems[sectionName] = getDefaultMenuItems(sectionName);
+  }
+  
+  // Add new item to menu items
+  menuItems[sectionName].push(newItem);
+  
+  // Save to local storage
+  localStorage.setItem('menuItems', JSON.stringify(menuItems));
+  
+  // Update UI
+  updateSidebar(sectionName);
+}
+
+// Function to delete menu item from a section
+function deleteMenuItem(sectionName, itemName) {
+  // Get current menu items from local storage
+  const menuItems = JSON.parse(localStorage.getItem('menuItems') || '{}');
+  
+  if (menuItems[sectionName]) {
+    // Remove the item from the array
+    menuItems[sectionName] = menuItems[sectionName].filter(item => item !== itemName);
+    
+    // Save to local storage
+    localStorage.setItem('menuItems', JSON.stringify(menuItems));
+    
+    // Update UI
+    updateSidebar(sectionName);
+  }
+}
+
+// Function to add a new section
+function addNewSection(sectionName, afterSection) {
+  // Get current data from local storage
+  const sectionNames = JSON.parse(localStorage.getItem('sectionNames') || '{}');
+  const menuItems = JSON.parse(localStorage.getItem('menuItems') || '{}');
+  
+  // Initialize menu items for new section
+  menuItems[sectionName] = [];
+  sectionNames[sectionName] = sectionName; // Add to section names
+  
+  // Save to local storage
+  localStorage.setItem('sectionNames', JSON.stringify(sectionNames));
+  localStorage.setItem('menuItems', JSON.stringify(menuItems));
+  
+  // Create container div for the new section
+  const contentContainer = document.getElementById('content-container');
+  const newSection = document.createElement('div');
+  newSection.id = sectionName.toLowerCase().replace(/\s+/g, '-');
+  newSection.className = 'w3-container w3-padding-64 hidden';
+  newSection.innerHTML = `
+    <div class="container">
+      <div class="header">${sectionName}</div>
+      <!-- Add your section content here -->
+    </div>
+  `;
+  contentContainer.appendChild(newSection);
+  
+  // Add to navbar
+  const navbar = document.querySelector('.w3-top .w3-bar');
+  const newLink = document.createElement('a');
+  newLink.href = 'javascript:void(0)';
+  newLink.className = 'w3-bar-item w3-button';
+  newLink.textContent = sectionName;
+  
+  // Add click event listener
+  newLink.addEventListener('click', function(event) {
+    showContent(sectionName.toLowerCase().replace(/\s+/g, '-'), event);
+  });
+  
+  // Find the reference section in navbar
+  const navbarLinks = Array.from(navbar.querySelectorAll('.w3-bar-item'));
+  let referenceLink = navbarLinks.find(link => link.textContent.trim() === afterSection);
+  
+  // Insert after the reference section
+  if (referenceLink) {
+    if (referenceLink.nextSibling) {
+      navbar.insertBefore(newLink, referenceLink.nextSibling);
+    } else {
+      navbar.appendChild(newLink);
+    }
+  } else {
+    // If reference section not found, insert before Admin Page
+    const adminLink = navbar.querySelector('a[onclick*="admin-page"]');
+    if (adminLink) {
+      navbar.insertBefore(newLink, adminLink);
+    } else {
+      navbar.appendChild(newLink);
+    }
+  }
+}
+
+// Modify the edit icon click handler
 document.addEventListener('DOMContentLoaded', function() {
   const eyeIcons = document.querySelectorAll('.admin-menu-section .fa-eye');
   
@@ -127,8 +343,11 @@ document.addEventListener('DOMContentLoaded', function() {
   plusIcons.forEach(icon => {
     icon.addEventListener('click', function() {
       const row = this.closest('tr');
+      const currentSection = row.cells[0].textContent;
       const newItemName = prompt('Nhập tên menu mới:');
       if (newItemName) {
+        addNewSection(newItemName, currentSection);
+        
         const newRow = document.createElement('tr');
         newRow.innerHTML = `
           <td>${newItemName}</td>
@@ -153,6 +372,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const currentName = row.cells[0].textContent;
       const newName = prompt('Sửa tên menu:', currentName);
       if (newName) {
+        updateSectionName(currentName, newName);
         row.cells[0].textContent = newName;
       }
     });
@@ -163,11 +383,16 @@ document.addEventListener('DOMContentLoaded', function() {
   deleteIcons.forEach(icon => {
     icon.addEventListener('click', function() {
       const row = this.closest('tr');
+      const sectionName = row.cells[0].textContent;
       if (confirm('Bạn có chắc chắn muốn xóa menu này?')) {
+        deleteSection(sectionName);
         row.remove();
       }
     });
   });
+
+  // Load section names from local storage on page load
+  loadSectionNames();
 });
 
 function populateMenuLayout(sectionName) {
@@ -189,22 +414,6 @@ function populateMenuLayout(sectionName) {
       <td><i class="fas fa-times"></i></td>
     `;
   });
-}
-
-function getMenuItems(sectionName) {
-  // Return different menu items based on the section
-  switch(sectionName) {
-    case 'Trang chủ':
-      return ['Thông tin khai giảng', 'Thông tin semina', 'Công ty quan tâm'];
-    case 'Thông tin môn học':
-      return ['Thông tin chung', 'Mô tả tóm tắt', 'Nội dung chi tiết', 'Tài liệu tham khảo'];
-    case 'Các công nghệ web':
-      return ['Frontend', 'Backend', 'Database', 'API', 'DevOps', 'Security', 'Testing'];
-    case 'Thông tin sinh viên':
-      return ['Thông tin cá nhân', 'Học tập', 'Kỹ năng', 'Dự án', 'Sở thích'];
-    default:
-      return [];
-  }
 }
 
 function updateSidebar(sectionName) {
@@ -257,8 +466,12 @@ function addIconEventListeners(row) {
   const deleteIcon = row.querySelector('.fa-times');
   if (deleteIcon) {
     deleteIcon.addEventListener('click', function() {
+      const row = this.closest('tr');
+      const sectionName = document.getElementById('selected-section').textContent;
+      const itemName = row.cells[0].textContent;
       if (confirm('Bạn có chắc chắn muốn xóa menu này?')) {
-        this.closest('tr').remove();
+        deleteMenuItem(sectionName, itemName);
+        row.remove();
       }
     });
   }
@@ -267,18 +480,13 @@ function addIconEventListeners(row) {
   const plusIcon = row.querySelector('.fa-plus');
   if (plusIcon) {
     plusIcon.addEventListener('click', function() {
+      const sectionName = this.closest('tr').querySelector('td').textContent;
       const newItemName = prompt('Nhập tên menu mới:');
       if (newItemName) {
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-          <td>${newItemName}</td>
-          <td><i class="fas fa-eye"></i></td>
-          <td><i class="fas fa-edit"></i></td>
-          <td><i class="fas fa-times"></i></td>
-          <td><i class="fas fa-plus"></i></td>
-        `;
-        this.closest('tr').parentNode.insertBefore(newRow, this.closest('tr').nextSibling);
-        addIconEventListeners(newRow);
+        addMenuItem(sectionName, newItemName);
+        
+        // Update the menu layout view
+        populateMenuLayout(sectionName);
       }
     });
   }
