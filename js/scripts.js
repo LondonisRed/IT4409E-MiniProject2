@@ -412,7 +412,14 @@ function populateMenuLayout(sectionName) {
       <td><i class="fas fa-eye"></i></td>
       <td><i class="fas fa-edit"></i></td>
       <td><i class="fas fa-times"></i></td>
+      <td><i class="fas fa-plus"></i></td>
     `;
+  });
+
+  // Add event listeners to all icons in the table
+  const rows = table.querySelectorAll('tr:not(:first-child)');
+  rows.forEach(row => {
+    addIconEventListeners(row);
   });
 }
 
@@ -435,18 +442,16 @@ function updateSidebar(sectionName) {
   });
 }
 
-// Function to add event listeners to icons in a new row
+// Function to add event listeners to icons in a row
 function addIconEventListeners(row) {
   // Add eye icon listener
   const eyeIcon = row.querySelector('.fa-eye');
   if (eyeIcon) {
     eyeIcon.addEventListener('click', function() {
-      const sectionName = this.closest('tr').querySelector('td').textContent;
-      document.getElementById('admin-menu-top').classList.add('hidden');
-      document.getElementById('menu-layout-view').classList.remove('hidden');
-      document.getElementById('selected-section').textContent = sectionName;
-      populateMenuLayout(sectionName);
-      updateSidebar(sectionName);
+      const itemName = this.closest('tr').cells[0].textContent;
+      const sectionName = document.getElementById('selected-section').textContent;
+      // Handle view action
+      console.log(`Viewing item: ${itemName} in section: ${sectionName}`);
     });
   }
 
@@ -454,10 +459,22 @@ function addIconEventListeners(row) {
   const editIcon = row.querySelector('.fa-edit');
   if (editIcon) {
     editIcon.addEventListener('click', function() {
-      const currentName = this.closest('tr').cells[0].textContent;
-      const newName = prompt('Sửa tên menu:', currentName);
+      const row = this.closest('tr');
+      const currentName = row.cells[0].textContent;
+      const newName = prompt('Sửa tên mục:', currentName);
       if (newName) {
-        this.closest('tr').cells[0].textContent = newName;
+        const sectionName = document.getElementById('selected-section').textContent;
+        const menuItems = getMenuItems(sectionName);
+        const index = menuItems.indexOf(currentName);
+        if (index !== -1) {
+          menuItems[index] = newName;
+          localStorage.setItem('menuItems', JSON.stringify({
+            ...JSON.parse(localStorage.getItem('menuItems') || '{}'),
+            [sectionName]: menuItems
+          }));
+          row.cells[0].textContent = newName;
+          updateSidebar(sectionName);
+        }
       }
     });
   }
@@ -469,7 +486,7 @@ function addIconEventListeners(row) {
       const row = this.closest('tr');
       const sectionName = document.getElementById('selected-section').textContent;
       const itemName = row.cells[0].textContent;
-      if (confirm('Bạn có chắc chắn muốn xóa menu này?')) {
+      if (confirm('Bạn có chắc chắn muốn xóa mục này?')) {
         deleteMenuItem(sectionName, itemName);
         row.remove();
       }
@@ -480,12 +497,10 @@ function addIconEventListeners(row) {
   const plusIcon = row.querySelector('.fa-plus');
   if (plusIcon) {
     plusIcon.addEventListener('click', function() {
-      const sectionName = this.closest('tr').querySelector('td').textContent;
-      const newItemName = prompt('Nhập tên menu mới:');
+      const sectionName = document.getElementById('selected-section').textContent;
+      const newItemName = prompt('Nhập tên mục mới:');
       if (newItemName) {
         addMenuItem(sectionName, newItemName);
-        
-        // Update the menu layout view
         populateMenuLayout(sectionName);
       }
     });
