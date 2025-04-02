@@ -726,6 +726,54 @@
       <div class="container">
         <div class="header">Admin Page</div>
         
+        <!-- Add admin contents layout section -->
+        <div id="admin-contents-layout" class="hidden">
+          <button id="returnFromContents" class="w3-button w3-theme" style="margin-bottom: 20px;">Quay lại</button>
+          <h3>Admin contents layout: "<span id="selected-content-section"></span>"</h3>
+          <div class="w3-container">
+            <div class="w3-row">
+              <div class="w3-col m12">
+                <table class="w3-table w3-bordered w3-striped">
+                  <tr>
+                    <th>Tên mục</th>
+                    <th>Xem</th>
+                    <th>Sửa</th>
+                    <th>Xóa</th>
+                  </tr>
+                  <tr>
+                    <td>Semina hôm nay</td>
+                    <td><i class="fas fa-eye"></i></td>
+                    <td><i class="fas fa-edit"></i></td>
+                    <td><i class="fas fa-times"></i></td>
+                  </tr>
+                  <tr>
+                    <td>Nội dung semina hôm nay</td>
+                    <td><i class="fas fa-eye"></i></td>
+                    <td><i class="fas fa-edit"></i></td>
+                    <td><i class="fas fa-times"></i></td>
+                  </tr>
+                  <tr>
+                    <td>Ảnh semina hôm nay</td>
+                    <td><i class="fas fa-eye"></i></td>
+                    <td><i class="fas fa-edit"></i></td>
+                    <td><i class="fas fa-times"></i></td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            <div class="w3-row" style="margin-top: 20px;">
+              <div class="w3-col m12">
+                <button class="w3-button w3-theme" onclick="addNewContent()">
+                  <i class="fas fa-plus"></i> Thêm mục content mới vào ngày sau
+                </button>
+                <button class="w3-button w3-theme" style="margin-left: 10px;">
+                  <i class="fas fa-info-circle"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Add this new section -->
         <div id="menu-layout-view" class="hidden">
           <button id="returnButton" class="w3-button w3-theme" style="margin-bottom: 20px;">Quay lại</button>

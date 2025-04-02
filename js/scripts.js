@@ -301,6 +301,146 @@ function addNewSection(sectionName, afterSection) {
   }
 }
 
+// Function to handle eye icon click in menu layout view
+function handleMenuEyeClick(menuItem) {
+  // Hide the menu layout view
+  document.getElementById('menu-layout-view').classList.add('hidden');
+  
+  // Show the admin contents layout
+  const adminContentsLayout = document.getElementById('admin-contents-layout');
+  adminContentsLayout.classList.remove('hidden');
+  
+  // Update the selected section title
+  const sectionName = document.getElementById('selected-section').textContent;
+  document.getElementById('selected-content-section').textContent = sectionName + " / " + menuItem;
+}
+
+// Function to populate content items
+function populateContentItems(sectionName, menuItem) {
+  const table = document.querySelector('#admin-contents-layout table');
+  
+  // Clear existing rows except header
+  while (table.rows.length > 1) {
+    table.deleteRow(1);
+  }
+  
+  // Add default content items based on section and menu item
+  let contentItems = [];
+  if (sectionName === "Trang chủ" && menuItem === "Thông tin semina") {
+    contentItems = [
+      "Semina hôm nay",
+      "Nội dung semina hôm nay",
+      "Ảnh semina hôm nay"
+    ];
+  }
+  
+  // Add content items to table
+  contentItems.forEach(item => {
+    const row = table.insertRow();
+    row.innerHTML = `
+      <td>${item}</td>
+      <td><i class="fas fa-eye"></i></td>
+      <td><i class="fas fa-edit"></i></td>
+      <td><i class="fas fa-times"></i></td>
+    `;
+    addContentEventListeners(row);
+  });
+}
+
+// Function to add new content
+function addNewContent() {
+  const newContentName = prompt('Nhập tên mục content mới:');
+  if (newContentName) {
+    const table = document.querySelector('#admin-contents-layout table');
+    const newRow = table.insertRow();
+    newRow.innerHTML = `
+      <td>${newContentName}</td>
+      <td><i class="fas fa-eye"></i></td>
+      <td><i class="fas fa-edit"></i></td>
+      <td><i class="fas fa-times"></i></td>
+    `;
+  }
+}
+
+// Function to add event listeners to content row icons
+function addContentEventListeners(row) {
+  // Add eye icon listener
+  const eyeIcon = row.querySelector('.fa-eye');
+  if (eyeIcon) {
+    eyeIcon.addEventListener('click', function() {
+      const contentName = this.closest('tr').cells[0].textContent;
+      alert('Viewing content: ' + contentName);
+    });
+  }
+
+  // Add edit icon listener
+  const editIcon = row.querySelector('.fa-edit');
+  if (editIcon) {
+    editIcon.addEventListener('click', function() {
+      const row = this.closest('tr');
+      const currentName = row.cells[0].textContent;
+      const newName = prompt('Sửa tên mục:', currentName);
+      if (newName) {
+        row.cells[0].textContent = newName;
+      }
+    });
+  }
+
+  // Add delete icon listener
+  const deleteIcon = row.querySelector('.fa-times');
+  if (deleteIcon) {
+    deleteIcon.addEventListener('click', function() {
+      if (confirm('Bạn có chắc chắn muốn xóa mục này?')) {
+        this.closest('tr').remove();
+      }
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Add return button handler for menu layout view
+  document.getElementById('returnButton').addEventListener('click', function() {
+    document.getElementById('menu-layout-view').classList.add('hidden');
+    document.getElementById('admin-menu-top').classList.remove('hidden');
+  });
+
+  // Add return button handler for admin contents layout
+  document.getElementById('returnFromContents').addEventListener('click', function() {
+    document.getElementById('admin-contents-layout').classList.add('hidden');
+    document.getElementById('menu-layout-view').classList.remove('hidden');
+  });
+
+  // Add event listeners to eye icons in menu layout view
+  const menuLayoutEyeIcons = document.querySelectorAll('#menu-layout-view .fa-eye');
+  menuLayoutEyeIcons.forEach(icon => {
+    icon.addEventListener('click', function() {
+      const menuItem = this.closest('tr').cells[0].textContent;
+      handleMenuEyeClick(menuItem);
+    });
+  });
+
+  // Add event listeners to eye icons in admin menu top
+  const adminMenuTopEyeIcons = document.querySelectorAll('.admin-menu-section .fa-eye');
+  adminMenuTopEyeIcons.forEach(icon => {
+    icon.addEventListener('click', function() {
+      const sectionName = this.closest('tr').querySelector('td').textContent;
+      
+      // Hide the admin menu top section
+      document.getElementById('admin-menu-top').classList.add('hidden');
+      
+      // Show the menu layout view
+      const menuLayoutView = document.getElementById('menu-layout-view');
+      menuLayoutView.classList.remove('hidden');
+      
+      // Update the selected section title
+      document.getElementById('selected-section').textContent = sectionName;
+      
+      // Populate the menu layout
+      populateMenuLayout(sectionName);
+    });
+  });
+});
+
 // Modify the edit icon click handler
 document.addEventListener('DOMContentLoaded', function() {
   const eyeIcons = document.querySelectorAll('.admin-menu-section .fa-eye');
